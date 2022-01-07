@@ -10,7 +10,7 @@ class Payment extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $table = "module_payments";
+    protected $table = "laravel_invoice_payments";
 
     public function invoice()
     {

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Visanduma\LaravelInvoice\Tests;
+namespace Visanduma\LaravelInvoice\Tests\database;
 
 
 use Illuminate\Database\Migrations\Migration;

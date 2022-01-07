@@ -6,18 +6,18 @@
  * Time: 12:51 PM
  */
 
-namespace Visanduma\LaravelInvoice\Helpers\Contracts;
+namespace Visanduma\LaravelInvoice\Helpers\Services;
 
 
 use Illuminate\Support\Str;
 
-class InvoiceContract
+class InvoiceService
 {
     private $invoice_date;
     private $due_date;
     private $status_value;
     private $note_value;
-    private $discount;
+    private $discount = 0;
     private $discount_value = 0;
     private $discount_type;
     private $invoice_items = [];
@@ -138,55 +138,60 @@ class InvoiceContract
         }
     }
 
-    public function save()
+    public function toArray()
     {
+        return [
+            'invoice' => [
+                'invoice_date' => $this->invoice_date,
+                'tag' => $this->tag,
+                'due_data' => $this->due_date,
+                'invoice_number' => $this->invoice_number,
+                'status' => 'CREATED',
+                'paid_status' => 'PENDING',
+                'note' => $this->note_value,
+                'discount' => $this->discount,
+                'discount_value' => $this->getDiscountValue(),
+                'discount_type' => $this->discount_type,
+                'sub_total' => 0,
+                'total' => $this->getTotalWithDiscount(),
+                'due_amount' => $this->getTotalWithDiscount(),
+                'created_by' => $this->createdBy
+            ],
 
-        $invoice = Invoice::create([
-            'invoice_date' => $this->invoice_date,
-            'tag' => $this->tag,
-            'due_data' => $this->due_date,
-            'invoice_number' => $this->invoice_number,
-            'status' => 'CREATED',
-            'paid_status' => 'PENDING',
-            'note' => $this->note_value,
-            'discount' => $this->discount,
-            'discount_value' => $this->getDiscountValue(),
-            'discount_type' => $this->discount_type,
-            'sub_total' => 0,
-            'total' => $this->getTotalWithDiscount(),
-            'due_amount' => $this->getTotalWithDiscount(),
-            'owner_type' => $this->ownerType,
-            'owner_id' => $this->ownerId,
-            'created_by' => $this->createdBy
-        ]);
+            'extra' => array_merge($this->generateInvoiceExtraData(), $this->generateAdditionalInvoiceData()),
+            'items' => $this->generateItemList()
+        ];
 
 
-        $items = array_map(function (InvoiceItemContract $item) {
+    }
+
+    private function generateItemList()
+    {
+        return array_map(function (InvoiceItemService $item) {
 
             return $item->toArray();
 
         }, $this->invoice_items);
+    }
 
-        $invoice->items()->createMany($items);
-        // adding invoice to data
-        $invoice->extra()->createMany(array_map(function ($value, $key) {
+    private function generateAdditionalInvoiceData()
+    {
+        return array_map(function ($value, $key) {
             return [
                 'key' => $key,
                 'value' => $value
             ];
-        }, $this->invoiceToData, array_keys($this->invoiceToData)));
+        }, $this->invoiceToData, array_keys($this->invoiceToData));
+    }
 
-        // adding invoice extra data
-        $invoice->extra()->createMany(array_map(function ($value, $key) {
+    private function generateInvoiceExtraData()
+    {
+        return array_map(function ($value, $key) {
             return [
                 'key' => $key,
                 'value' => $value
             ];
-        }, $this->extra, array_keys($this->extra)));
-
-        return true;
-
-
+        }, $this->extra, array_keys($this->extra));
     }
 
     private function getDiscountValue()
@@ -200,7 +205,7 @@ class InvoiceContract
 
     public function getItemsTotal()
     {
-        return array_sum(array_map(function (InvoiceItemContract $item) {
+        return array_sum(array_map(function (InvoiceItemService $item) {
             return $item->totalWithDiscount();
         }, $this->invoice_items));
     }

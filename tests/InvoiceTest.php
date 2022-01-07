@@ -15,7 +15,6 @@ class InvoiceTest extends TestCase
 
     private $testModel, $invoice;
 
-
     public function test_itCanCreateEmptyInvoiceObject()
     {
         $invoice = Invoice::make();
@@ -48,19 +47,75 @@ class InvoiceTest extends TestCase
     }
 
 
-//    public function test_saveInvoiceToDatabase()
-//    {
-//        $model = new TestModel();
-//        $model->save();
-//
-//        $invoice = Invoice::make();
-//        $invoice->invoiceToName('Lahiru');
-//        $invoice->invoiceToAddress('Anuradhapura');
-//
-//        $model->invoices()->save($invoice);
-//
-//
-//    }
+    public function test_saveInvoiceToDatabase()
+    {
+        $model = new TestModel();
+        $model->save();
+
+        $invoice = Invoice::make();
+        $invoice->invoiceToName('Lahiru');
+        $invoice->invoiceToAddress('Anuradhapura');
+
+        $model->attachInvoice($invoice);
+
+        $this->assertCount(1, Invoice::all());
+
+    }
+
+    public function test_saveItemsWithInvoice()
+    {
+        $model = new TestModel();
+        $model->save();
+
+        $invoice = Invoice::make();
+        $invoice->invoiceToName('Lahiru');
+        $invoice->invoiceToAddress('Anuradhapura');
+
+        $invoice->addItems([
+            InvoiceItem::make()->setName('Product one')->setPrice(100)->setQty(2),
+            InvoiceItem::make()->setName('Product two')->setPrice(100)->setQty(2),
+        ]);
+
+        $model->attachInvoice($invoice);
+
+        $this->assertCount(2, InvoiceItem::all());
+    }
+
+    public function test_saveInvoiceExtra()
+    {
+        $model = new TestModel();
+        $model->save();
+
+        $invoice = Invoice::make();
+        $invoice->invoiceToName('Lahiru');
+        $invoice->invoiceToAddress('Anuradhapura');
+
+        $invoice->setExtraValue('fax', '012542856625');
+
+        $model->attachInvoice($invoice);
+
+        $this->assertEquals('012542856625', $model->lastInvoice()->extraValue('fax'));
+    }
+
+
+    public function test_ableToFindInvoices()
+    {
+        $model = new TestModel();
+        $model->save();
+
+        $invoice = Invoice::make();
+        $invoice->invoiceToName('Lahiru');
+        $invoice->invoiceToAddress('Anuradhapura');
+        $invoice->setInvoiceNumber("XA12345");
+
+        $inv = $model->attachInvoice($invoice);
+
+        // find by invoice number
+        $this->assertNotNull($model->findInvoiceByNumber("XA12345"));
+        // find by invoice ID
+        $this->assertNotNull($model->findInvoiceById($inv->id));
+
+    }
 
 
 }

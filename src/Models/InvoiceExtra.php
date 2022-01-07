@@ -11,7 +11,7 @@ class InvoiceExtra extends Model
 
     protected $guarded = [];
 
-    protected $table = 'module_invoice_extras';
+    protected $table = 'laravel_invoice_extras';
 
 
 }

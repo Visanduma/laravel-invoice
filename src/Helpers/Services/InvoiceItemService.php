@@ -6,10 +6,10 @@
  * Time: 1:07 PM
  */
 
-namespace Visanduma\LaravelInvoice\Helpers\Contracts;
+namespace Visanduma\LaravelInvoice\Helpers\Services;
 
 
-class InvoiceItemContract
+class InvoiceItemService
 {
     private $name, $description, $price, $qty;
     private $unit = '';

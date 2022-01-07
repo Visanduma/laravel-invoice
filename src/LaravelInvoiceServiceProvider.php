@@ -4,7 +4,6 @@ namespace Visanduma\LaravelInvoice;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Visanduma\LaravelInvoice\Commands\LaravelInvoiceCommand;
 
 class LaravelInvoiceServiceProvider extends PackageServiceProvider
 {
@@ -19,7 +18,7 @@ class LaravelInvoiceServiceProvider extends PackageServiceProvider
             ->name('laravel-invoice')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_invoices_table')
-            ->hasCommand(LaravelInvoiceCommand::class);
+            ->hasMigration('create_invoices_table');
+//            ->hasCommand(LaravelInvoiceCommand::class);
     }
 }

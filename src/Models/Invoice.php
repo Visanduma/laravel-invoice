@@ -4,7 +4,8 @@ namespace Visanduma\LaravelInvoice\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Visanduma\LaravelInvoice\Helpers\Contracts\InvoiceContract;
+use Visanduma\LaravelInvoice\Helpers\Services\InvoiceService;
+use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceActions;
 
 
 class Invoice extends Model
@@ -12,11 +13,11 @@ class Invoice extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $table = "module_invoices";
+    protected $table = "laravel_invoices";
 
     public static function make()
     {
-        return new InvoiceContract();
+        return new InvoiceService();
     }
 
     public function items()
