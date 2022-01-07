@@ -18,6 +18,13 @@ class InvoiceItemService
     private $tag;
 
 
+    public function __construct(string $name, float $price, float $qty)
+    {
+        $this->name = $name;
+        $this->price = $price;
+        $this->qty = $qty;
+    }
+
     public function setName($value)
     {
         $this->name = $value;

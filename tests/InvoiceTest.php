@@ -73,7 +73,7 @@ class InvoiceTest extends TestCase
 
         $invoice->addItems([
             InvoiceItem::make()->setName('Product one')->setPrice(100)->setQty(2),
-            InvoiceItem::make()->setName('Product two')->setPrice(100)->setQty(2),
+            InvoiceItem::make('Product 3', 100, 1),
         ]);
 
         $model->attachInvoice($invoice);
