@@ -53,5 +53,10 @@ class Invoice extends Model
         return $this->extra->where('key', $key)->first()->value ?? "";
     }
 
+    public function paidAmount()
+    {
+        return $this->payments()->sum('amount');
+    }
+
 
 }
