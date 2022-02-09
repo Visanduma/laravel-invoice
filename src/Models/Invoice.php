@@ -58,5 +58,10 @@ class Invoice extends Model
         return $this->payments()->sum('amount');
     }
 
+    public function dueAmount()
+    {
+        return $this->total - $this->payments()->sum('amount');
+    }
+
 
 }
