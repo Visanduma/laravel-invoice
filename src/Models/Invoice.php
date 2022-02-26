@@ -27,15 +27,20 @@ class Invoice extends Model
 
     public function addPayment($amount, $method = 'CASH')
     {
-        $this->payments()->create([
-            'method' => $method,
-            'amount' => $amount,
-            'payment_date' => now()
-        ]);
+        
+        if($amount != 0){
+            $this->payments()->create([
+                'method' => $method,
+                'amount' => $amount,
+                'payment_date' => now()
+            ]);
 
-        $this->decrement('due_amount', $amount);
-        $this->paid_status = "PAID";
-        $this->save();
+            $this->decrement('due_amount', $amount);
+            $this->paid_status = "PAID";
+            $this->save();
+        }
+        
+        
     }
 
     public function payments()
