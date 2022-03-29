@@ -117,5 +117,24 @@ class InvoiceTest extends TestCase
 
     }
 
+    public function test_ableToMakePayment()
+    {
+        $model = new TestModel();
+        $model->save();
+
+        $invoice = Invoice::make();
+        $invoice->invoiceToName('Lahiru');
+        $invoice->invoiceToAddress('Anuradhapura');
+        $invoice->setInvoiceNumber("XA12345");
+
+        $model->attachInvoice($invoice);
+
+        $invoice->addPayment(100);
+
+        $this->assertDatabaseCount('laravel_invoice_payments',1);
+
+
+    }
+
 
 }

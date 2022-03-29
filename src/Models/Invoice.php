@@ -4,6 +4,8 @@ namespace Visanduma\LaravelInvoice\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Visanduma\LaravelInvoice\Helpers\Services\InvoiceService;
 use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceActions;
 
@@ -25,12 +27,16 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
-    public function addPayment($amount, $method = 'CASH')
+    public function addPayment($amount,  $note = null,$method = 'CASH')
     {
+        if($amount == 0){
+            return;
+        }
         $this->payments()->create([
             'method' => $method,
             'amount' => $amount,
-            'payment_date' => now()
+            'payment_date' => now(),
+            'note' => $note
         ]);
 
         $this->decrement('due_amount', $amount);
@@ -53,5 +59,28 @@ class Invoice extends Model
         return $this->extra->where('key', $key)->first()->value ?? "";
     }
 
+    public function paidAmount()
+    {
+        return $this->payments()->sum('amount');
+    }
+
+    public static function getNextInvoiceNumber($prefix = "INV")
+    {
+        $next_id= static::max('id') + 1;
+        return $prefix.Str::padLeft($next_id,6,"0");
+    }
+
+    public function statusLabel()
+    {
+       if($this->due_amount == 0)
+           return ["Complete",'success'];
+        if($this->due_amount > 0)
+            return ["Partialy Paid",'warning'];
+        if($this->due_amount == $this->total)
+            return ["Not Paid",'danger'];
+
+        return ["Unknown",'secondary'];
+
+    }
 
 }
