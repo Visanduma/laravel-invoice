@@ -13,9 +13,9 @@ class InvoiceItem extends Model
     protected $guarded = [];
     protected $table = "laravel_invoice_items";
 
-    public static function make()
+    public static function make($name = '', $price = 0, $qty = 1)
     {
-        return new InvoiceItemService();
+        return new InvoiceItemService($name, $price, $qty);
     }
 
     public function invoice()

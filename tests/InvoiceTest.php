@@ -46,8 +46,7 @@ class InvoiceTest extends TestCase
         $this->assertEquals(90, $item->totalWithDiscount());
     }
 
-
-    public function test_saveInvoiceToDatabase()
+    private function make_invoice($number = 'XA12345')
     {
         $model = new TestModel();
         $model->save();
@@ -55,8 +54,20 @@ class InvoiceTest extends TestCase
         $invoice = Invoice::make();
         $invoice->invoiceToName('Lahiru');
         $invoice->invoiceToAddress('Anuradhapura');
+        $invoice->setInvoiceNumber($number);
 
-        $model->attachInvoice($invoice);
+        $invoice->setExtraValue('fax', '012542856625');
+
+        $invoice->addItems([
+            InvoiceItem::make('Product 1', 100, 10),
+        ]);
+
+        return $model->attachInvoice($invoice);
+    }
+
+    public function test_saveInvoiceToDatabase()
+    {
+        $this->make_invoice();
 
         $this->assertCount(1, Invoice::all());
 
@@ -71,14 +82,28 @@ class InvoiceTest extends TestCase
         $invoice->invoiceToName('Lahiru');
         $invoice->invoiceToAddress('Anuradhapura');
 
-        $invoice->addItems([
-            InvoiceItem::make()->setName('Product one')->setPrice(100)->setQty(2),
-            InvoiceItem::make()->setName('Product two')->setPrice(100)->setQty(2),
+//        $invoice->addItems([
+//            InvoiceItem::make()->setName('Product 1')->setPrice(100)->setQty(2),
+//            InvoiceItem::make('Product 2', 100, 10),
+//        ]);
+
+        $invoice->addItemsAsArray([
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2],
+            ['name' => 'product 2', 'price' => 100, 'qty' => 10],
         ]);
 
-        $model->attachInvoice($invoice);
+        $inv = $model->attachInvoice($invoice);
 
-        $this->assertCount(2, InvoiceItem::all());
+        // count invoice items
+        $this->assertCount(2, $inv->items);
+        // check invoice total
+        $this->assertEquals(1200, $inv->total);
+        // check due balance
+        $this->assertEquals(1200, $inv->dueAmount());
+        // add payment
+        $inv->addPayment(200);
+        // check due again
+        $this->assertEquals(1000, $inv->dueAmount());
     }
 
     public function test_saveInvoiceExtra()
@@ -96,7 +121,6 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals('012542856625', $model->lastInvoice()->extraValue('fax'));
     }
-
 
     public function test_ableToFindInvoices()
     {
@@ -117,22 +141,17 @@ class InvoiceTest extends TestCase
 
     }
 
-    public function test_ableToMakePayment()
+    public function test_payForInvoice()
     {
-        $model = new TestModel();
-        $model->save();
+        $inv = $this->make_invoice();
 
-        $invoice = Invoice::make();
-        $invoice->invoiceToName('Lahiru');
-        $invoice->invoiceToAddress('Anuradhapura');
-        $invoice->setInvoiceNumber("XA12345");
+        $inv->addPayment(100);
+        $inv->addPayment(450);
+        $inv->addPayment(-50);
 
-        $model->attachInvoice($invoice);
+        $this->assertDatabaseCount('laravel_invoice_payments', 3);
 
-        $invoice->addPayment(100);
-
-        $this->assertDatabaseCount('laravel_invoice_payments',1);
-
+        $this->assertEquals(500, $inv->payments()->sum('amount'));
 
     }
 

@@ -10,6 +10,7 @@ namespace Visanduma\LaravelInvoice\Helpers\Services;
 
 
 use Illuminate\Support\Str;
+use Visanduma\LaravelInvoice\Models\InvoiceItem;
 
 class InvoiceService
 {
@@ -104,6 +105,17 @@ class InvoiceService
     public function addItems(array $items)
     {
         $this->invoice_items = $items;
+    }
+
+    public function addItemsAsArray(array $items = [])
+    {
+        /*
+         *  array keys
+         *  name,price,qty
+         */
+        foreach ($items as $item) {
+            $this->invoice_items[] = InvoiceItem::make($item['name'], $item['price'], $item['qty']);
+        }
     }
 
     public function getItemCount()
