@@ -4,7 +4,6 @@
 namespace Visanduma\LaravelInvoice\Helpers\Traits;
 
 
-use Visanduma\LaravelInvoice\Helpers\Services\InvoiceService;
 use Visanduma\LaravelInvoice\Models\Invoice;
 
 trait InvoiceAble
@@ -14,11 +13,12 @@ trait InvoiceAble
         return $this->morphMany(Invoice::class, 'invoiceable');
     }
 
-    public function attachInvoice(InvoiceService $invoice): Invoice
+    public function attachInvoice(Invoice $invoice): Invoice
     {
-        $inv = $this->invoices()->create($invoice->toArray()['invoice']);
-        $inv->items()->createMany($invoice->toArray()['items']);
-        $inv->extra()->createMany($invoice->toArray()['extra']);
+        $inv = $this->invoices()->save($invoice);
+
+//        $inv->items()->createMany($invoice->toArray()['items']);
+//        $inv->extra()->createMany($invoice->toArray()['extra']);
 
         return $inv;
     }

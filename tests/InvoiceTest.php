@@ -51,18 +51,36 @@ class InvoiceTest extends TestCase
         $model = new TestModel();
         $model->save();
 
-        $invoice = Invoice::make();
-        $invoice->invoiceToName('Lahiru');
-        $invoice->invoiceToAddress('Anuradhapura');
-        $invoice->setInvoiceNumber($number);
+        $invoice = [
+            'invoice_date' => now(),
+            'tag' => 'prime',
+            'due_data' => now()->addDay(),
+            'invoice_number' => $number,
+            'status' => 'CREATED',
+            'paid_status' => 'PENDING',
+            'note' => '',
+            'discount' => 0,
+            'discount_value' => 150,
+            'discount_type' => 1,
+            'sub_total' => 5000,
+            'total' => 10,
+            'due_amount' => 45,
+            'created_by' => 2
+        ];
 
-        $invoice->setExtraValue('fax', '012542856625');
 
-        $invoice->addItems([
-            InvoiceItem::make('Product 1', 100, 10),
+        return $model->invoices()->create($invoice);
+
+    }
+
+    private function add_items_to_invoice($invoice)
+    {
+        $invoice->items()->createMany([
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2, 'total' => 200],
+            ['name' => 'product 2', 'price' => 150, 'qty' => 1, 'total' => 150],
         ]);
 
-        return $model->attachInvoice($invoice);
+        return $invoice;
     }
 
     public function test_saveInvoiceToDatabase()
@@ -70,56 +88,83 @@ class InvoiceTest extends TestCase
         $this->make_invoice();
 
         $this->assertCount(1, Invoice::all());
+        $this->assertEquals(10, Invoice::first()->total);
 
     }
 
-    public function test_saveItemsWithInvoice()
+    public function test_saveSingleItemToInvoice()
     {
-        $model = new TestModel();
-        $model->save();
+        $invoice = $this->make_invoice();
+        $item = [
+            'name' => "item 01",
+            'description' => 'tiny description',
+            'price' => 150,
+            'qty' => 1,
+            'unit' => 'Nos',
+            'tag' => '',
+            'discount' => 0,
+            'discount_value' => 0,
+            'discount_type' => '',
+            'total' => 150
+        ];
 
-        $invoice = Invoice::make();
-        $invoice->invoiceToName('Lahiru');
-        $invoice->invoiceToAddress('Anuradhapura');
+        $invoice->items()->create($item);
 
-//        $invoice->addItems([
-//            InvoiceItem::make()->setName('Product 1')->setPrice(100)->setQty(2),
-//            InvoiceItem::make('Product 2', 100, 10),
-//        ]);
+        $this->assertCount(1, $invoice->items);
+        $this->assertEquals(150, $invoice->items->first()->price);
+    }
 
-        $invoice->addItemsAsArray([
-            ['name' => 'product 1', 'price' => 100, 'qty' => 2],
-            ['name' => 'product 2', 'price' => 100, 'qty' => 10],
+    public function test_saveMultipleItemsToInvoice()
+    {
+        $invoice = $this->make_invoice();
+
+        $invoice->items()->createMany([
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2, 'total' => 452],
+            ['name' => 'product 2', 'price' => 100, 'qty' => 10, 'total' => 452],
         ]);
 
-        $inv = $model->attachInvoice($invoice);
-
         // count invoice items
-        $this->assertCount(2, $inv->items);
+        $this->assertCount(2, $invoice->items);
         // check invoice total
-        $this->assertEquals(1200, $inv->total);
+        $this->assertEquals(10, $invoice->total);
         // check due balance
-        $this->assertEquals(1200, $inv->dueAmount());
-        // add payment
-        $inv->addPayment(200);
-        // check due again
-        $this->assertEquals(1000, $inv->dueAmount());
+        $this->assertEquals(45, $invoice->due_amount);
+
     }
 
     public function test_saveInvoiceExtra()
     {
-        $model = new TestModel();
-        $model->save();
-
-        $invoice = Invoice::make();
-        $invoice->invoiceToName('Lahiru');
-        $invoice->invoiceToAddress('Anuradhapura');
-
+        $invoice = $this->make_invoice();
         $invoice->setExtraValue('fax', '012542856625');
 
-        $model->attachInvoice($invoice);
 
-        $this->assertEquals('012542856625', $model->lastInvoice()->extraValue('fax'));
+        $this->assertEquals('012542856625', $invoice->extraValue('fax'));
+    }
+
+    public function test_calculateInvoiceTotal()
+    {
+        $invoice = $this->add_items_to_invoice($this->make_invoice());
+
+        $this->assertEquals(350, $invoice->total());
+    }
+
+    public function test_setFlatDiscount()
+    {
+        $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
+        $invoice->setDiscount(50);
+
+        $this->assertEquals(300, $invoice->totalWithDiscount());
+
+    }
+
+    public function test_setPercentageDiscount()
+    {
+        $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
+        $invoice->setDiscount('10%');
+
+        dd($invoice);
+        $this->assertEquals(35, $invoice->discount_value);
+
     }
 
     public function test_ableToFindInvoices()

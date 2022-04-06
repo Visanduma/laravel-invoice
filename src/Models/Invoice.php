@@ -4,22 +4,21 @@ namespace Visanduma\LaravelInvoice\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Visanduma\LaravelInvoice\Helpers\Services\InvoiceService;
 use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceActions;
 
 
 class Invoice extends Model
 {
     use HasFactory;
+    use InvoiceActions;
 
     protected $guarded = [];
     protected $table = "laravel_invoices";
 
     public static function make()
     {
-        return new InvoiceService();
+        return new static();
     }
 
     public function items()
@@ -56,7 +55,7 @@ class Invoice extends Model
 
     public function extraValue($key)
     {
-        return $this->extra->where('key', $key)->first()->value ?? "";
+        return $this->extra()->where('key', $key)->first()->value ?? "";
     }
 
     public function paidAmount()
