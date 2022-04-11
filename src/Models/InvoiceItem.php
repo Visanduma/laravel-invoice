@@ -11,8 +11,25 @@ class InvoiceItem extends Model
     use HasFactory;
     use InvoiceItemActions;
 
+    const DISCOUNT_FLAT = 0;
+    const DISCOUNT_PERCENTAGE = 1;
+
     protected $guarded = [];
     protected $table = "laravel_invoice_items";
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($model) {
+            $model->total = $model['price'] * $model['qty'];
+        });
+
+        self::updating(function ($model) {
+            $model->total = $model['price'] * $model['qty'];
+        });
+    }
 
     public static function make($name = '', $price = 0, $qty = 1)
     {

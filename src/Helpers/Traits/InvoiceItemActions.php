@@ -4,6 +4,8 @@
 namespace Visanduma\LaravelInvoice\Helpers\Traits;
 
 
+use Visanduma\LaravelInvoice\Models\InvoiceItem;
+
 trait InvoiceItemActions
 {
     private $name, $description, $price, $qty;
@@ -88,7 +90,7 @@ trait InvoiceItemActions
 
     private function getDiscountValue()
     {
-        if ($this->discountType == 'percentage') {
+        if ($this->discountType == InvoiceItem::DISCOUNT_PERCENTAGE) {
             return $this->totalWithoutDiscount() * $this->discount / 100;
         }
 

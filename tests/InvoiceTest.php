@@ -60,11 +60,11 @@ class InvoiceTest extends TestCase
             'paid_status' => 'PENDING',
             'note' => '',
             'discount' => 0,
-            'discount_value' => 150,
+            'discount_value' => 0,
             'discount_type' => 1,
-            'sub_total' => 5000,
-            'total' => 10,
-            'due_amount' => 45,
+            'sub_total' => 0,
+            'total' => 0,
+            'due_amount' => 0,
             'created_by' => 2
         ];
 
@@ -88,7 +88,6 @@ class InvoiceTest extends TestCase
         $this->make_invoice();
 
         $this->assertCount(1, Invoice::all());
-        $this->assertEquals(10, Invoice::first()->total);
 
     }
 
@@ -99,19 +98,18 @@ class InvoiceTest extends TestCase
             'name' => "item 01",
             'description' => 'tiny description',
             'price' => 150,
-            'qty' => 1,
+            'qty' => 2,
             'unit' => 'Nos',
             'tag' => '',
             'discount' => 0,
-            'discount_value' => 0,
-            'discount_type' => '',
-            'total' => 150
+            'discount_type' => InvoiceItem::DISCOUNT_FLAT
         ];
 
         $invoice->items()->create($item);
 
         $this->assertCount(1, $invoice->items);
         $this->assertEquals(150, $invoice->items->first()->price);
+        $this->assertEquals(300, $invoice->items->first()->total);
     }
 
     public function test_saveMultipleItemsToInvoice()
@@ -160,10 +158,9 @@ class InvoiceTest extends TestCase
     public function test_setPercentageDiscount()
     {
         $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
-        $invoice->setDiscount('10%');
+        $invoice->setDiscount(50);
 
-        dd($invoice);
-        $this->assertEquals(35, $invoice->discount_value);
+        $this->assertEquals(300, $invoice->discount_value);
 
     }
 

@@ -69,9 +69,11 @@ trait InvoiceActions
 
     public function setDiscountPercentage($percentage)
     {
-        $this->discount_type = 'percentage';
+
+        $this->discount_type = 2;
         $this->discount = $percentage;
         $this->discount_value = $this->total() * $percentage / 100;
+        $this->save();
 
         return $this;
     }

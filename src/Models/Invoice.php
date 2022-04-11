@@ -71,15 +71,20 @@ class Invoice extends Model
 
     public function statusLabel()
     {
-       if($this->due_amount == 0)
-           return ["Complete",'success'];
-        if($this->due_amount > 0)
-            return ["Partialy Paid",'warning'];
-        if($this->due_amount == $this->total)
-            return ["Not Paid",'danger'];
+        if ($this->due_amount == 0)
+            return ["Complete", 'success'];
+        if ($this->due_amount > 0)
+            return ["Partialy Paid", 'warning'];
+        if ($this->due_amount == $this->total)
+            return ["Not Paid", 'danger'];
 
-        return ["Unknown",'secondary'];
+        return ["Unknown", 'secondary'];
 
+    }
+
+    public function updateValues()
+    {
+        //
     }
 
 }
