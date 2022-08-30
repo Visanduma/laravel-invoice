@@ -15,12 +15,7 @@ trait InvoiceAble
 
     public function attachInvoice(Invoice $invoice): Invoice
     {
-        $inv = $this->invoices()->save($invoice);
-
-//        $inv->items()->createMany($invoice->toArray()['items']);
-//        $inv->extra()->createMany($invoice->toArray()['extra']);
-
-        return $inv;
+        return $this->invoices()->save($invoice);
     }
 
     public function lastInvoice(): Invoice

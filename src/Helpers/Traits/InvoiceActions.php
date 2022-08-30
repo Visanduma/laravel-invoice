@@ -14,9 +14,6 @@ trait InvoiceActions
     private $due_date;
     private $status_value;
     private $note_value;
-    private $discount = 0;
-    private $discount_value = 0;
-    private $discount_type;
     private $invoice_items = [];
     private $invoice_number = '';
     private $createdBy;
@@ -62,18 +59,22 @@ trait InvoiceActions
             return $this->setDiscountPercentage((double)$amount);
         }
 
-        $this->discount_type = 'amount';
-        $this->discount = $amount;
+        $this->update([
+            'discount_type' => 'amount',
+            'discount_value' => $amount,
+            'discount' => $amount,
+        ]);
+
         return $this;
     }
 
     public function setDiscountPercentage($percentage)
     {
-
-        $this->discount_type = 2;
-        $this->discount = $percentage;
-        $this->discount_value = $this->total() * $percentage / 100;
-        $this->save();
+        $this->update([
+            'discount_type' => 'percentage',
+            'discount_value' => $percentage,
+            'discount' => $this->total() * $percentage / 100,
+        ]);
 
         return $this;
     }
@@ -230,7 +231,12 @@ trait InvoiceActions
 
     public function totalWithDiscount()
     {
-        return $this->total() - $this->getDiscountValue();
+        return $this->total() - $this->discount;
+    }
+
+    public function paidAmount()
+    {
+        return $this->payments()->sum('amount');
     }
 
 

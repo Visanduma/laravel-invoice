@@ -13,6 +13,13 @@ class Invoice extends Model
     use HasFactory;
     use InvoiceActions;
 
+    const STATUS_DRAFT = 'DRAFT';
+    const STATUS_COMPLETED = 'COMPLETED';
+    const STATUS_SENT = 'SENT';
+
+    const STATUS_PAID = 'PAID';
+    const STATUS_UNPAID = 'UNPAID';
+
     protected $guarded = [];
     protected $table = "laravel_invoices";
 
@@ -53,12 +60,12 @@ class Invoice extends Model
         return $this->hasMany(InvoiceExtra::class);
     }
 
-    public function extraValue($key)
+    public function getExtraValue($key)
     {
         return $this->extra()->where('key', $key)->first()->value ?? "";
     }
 
-    public function paidAmount()
+    public function paidAmount(): float
     {
         return $this->payments()->sum('amount');
     }
@@ -69,22 +76,29 @@ class Invoice extends Model
         return $prefix.Str::padLeft($next_id,6,"0");
     }
 
-    public function statusLabel()
+    public function statusToString()
     {
-        if ($this->due_amount == 0)
-            return ["Complete", 'success'];
-        if ($this->due_amount > 0)
-            return ["Partialy Paid", 'warning'];
-        if ($this->due_amount == $this->total)
-            return ["Not Paid", 'danger'];
-
-        return ["Unknown", 'secondary'];
-
+        return Str::replace("_", " ", $this->status);
     }
 
-    public function updateValues()
+    public function updateCalculation()
     {
-        //
+        $this->total = $this->total();
+        $this->save();
+    }
+
+    public function setStatus($status)
+    {
+        $this->update([
+            'status' => $status
+        ]);
+    }
+
+    public function setPaymentStatus($status)
+    {
+        $this->update([
+            'paid_status' => $status
+        ]);
     }
 
 }

@@ -15,7 +15,7 @@ class CreateInvoiceTables extends Migration
     {
         Schema::create('laravel_invoices', function (Blueprint $table) {
             $table->id();
-            $table->morphs('invoiceable');
+            $table->nullableMorphs('invoiceable');
             $table->date('invoice_date');
             $table->date('due_data')->nullable();
             $table->string('tag')->nullable();

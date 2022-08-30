@@ -9,6 +9,9 @@ use Visanduma\LaravelInvoice\Tests\database\TestTable;
 
 class TestCase extends Orchestra
 {
+    public TestModel $invoiceAble;
+
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -17,6 +20,9 @@ class TestCase extends Orchestra
         Factory::guessFactoryNamesUsing(
             fn(string $modelName) => 'Visanduma\\LaravelInvoice\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
         );
+
+        $this->invoiceAble = new TestModel();
+        $this->invoiceAble->save();
     }
 
     protected function getPackageProviders($app)

@@ -15,49 +15,15 @@ class InvoiceTest extends TestCase
 
     private $testModel, $invoice;
 
-    public function test_itCanCreateEmptyInvoiceObject()
+    private function make_invoice($number = 'XA12345'): Invoice
     {
-        $invoice = Invoice::make();
-        $this->assertEquals(0, $invoice->getItemCount());
-        $this->assertEquals(0, $invoice->getItemsTotal());
-
-    }
-
-    public function test_itCanCreateInvoiceItemObject()
-    {
-        $item = InvoiceItem::make();
-        $item->setPrice(10);
-        $item->setQty(1);
-
-        $this->assertEquals(10, $item->totalWithDiscount());
-    }
-
-    public function test_itCanApplyDiscountPerItem()
-    {
-        $item = InvoiceItem::make();
-        $item->setPrice(100);
-        $item->setQty(1);
-
-        $item->setDiscount(20);
-        $this->assertEquals(80, $item->totalWithDiscount());
-        $this->assertEquals(100, $item->totalWithoutDiscount());
-
-        $item->setDiscountPercentage(10);
-        $this->assertEquals(90, $item->totalWithDiscount());
-    }
-
-    private function make_invoice($number = 'XA12345')
-    {
-        $model = new TestModel();
-        $model->save();
-
         $invoice = [
             'invoice_date' => now(),
             'tag' => 'prime',
             'due_data' => now()->addDay(),
             'invoice_number' => $number,
-            'status' => 'CREATED',
-            'paid_status' => 'PENDING',
+            'status' => Invoice::STATUS_DRAFT,
+            'paid_status' => Invoice::STATUS_UNPAID,
             'note' => '',
             'discount' => 0,
             'discount_value' => 0,
@@ -69,8 +35,7 @@ class InvoiceTest extends TestCase
         ];
 
 
-        return $model->invoices()->create($invoice);
-
+        return Invoice::create($invoice);
     }
 
     private function add_items_to_invoice($invoice)
@@ -85,31 +50,30 @@ class InvoiceTest extends TestCase
 
     public function test_saveInvoiceToDatabase()
     {
-        $this->make_invoice();
+        $invoice = $this->make_invoice();
+        $this->invoiceAble->invoices()->save($invoice);
 
-        $this->assertCount(1, Invoice::all());
-
+        $this->assertCount(1, $this->invoiceAble->invoices);
     }
 
     public function test_saveSingleItemToInvoice()
     {
         $invoice = $this->make_invoice();
+
         $item = [
             'name' => "item 01",
             'description' => 'tiny description',
             'price' => 150,
-            'qty' => 2,
+            'qty' => 15,
             'unit' => 'Nos',
             'tag' => '',
             'discount' => 0,
-            'discount_type' => InvoiceItem::DISCOUNT_FLAT
+            'discount_type' => InvoiceItem::DISCOUNT_FLAT,
         ];
 
         $invoice->items()->create($item);
 
         $this->assertCount(1, $invoice->items);
-        $this->assertEquals(150, $invoice->items->first()->price);
-        $this->assertEquals(300, $invoice->items->first()->total);
     }
 
     public function test_saveMultipleItemsToInvoice()
@@ -117,17 +81,12 @@ class InvoiceTest extends TestCase
         $invoice = $this->make_invoice();
 
         $invoice->items()->createMany([
-            ['name' => 'product 1', 'price' => 100, 'qty' => 2, 'total' => 452],
-            ['name' => 'product 2', 'price' => 100, 'qty' => 10, 'total' => 452],
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2],
+            ['name' => 'product 2', 'price' => 100, 'qty' => 10],
         ]);
 
         // count invoice items
         $this->assertCount(2, $invoice->items);
-        // check invoice total
-        $this->assertEquals(10, $invoice->total);
-        // check due balance
-        $this->assertEquals(45, $invoice->due_amount);
-
     }
 
     public function test_saveInvoiceExtra()
@@ -136,7 +95,7 @@ class InvoiceTest extends TestCase
         $invoice->setExtraValue('fax', '012542856625');
 
 
-        $this->assertEquals('012542856625', $invoice->extraValue('fax'));
+        $this->assertEquals('012542856625', $invoice->getExtraValue('fax'));
     }
 
     public function test_calculateInvoiceTotal()
@@ -149,38 +108,26 @@ class InvoiceTest extends TestCase
     public function test_setFlatDiscount()
     {
         $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
-        $invoice->setDiscount(50);
+        $invoice->setDiscount(150);
 
-        $this->assertEquals(300, $invoice->totalWithDiscount());
-
+        $this->assertEquals(200, $invoice->totalWithDiscount());
     }
 
     public function test_setPercentageDiscount()
     {
         $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
-        $invoice->setDiscount(50);
+        $invoice->setDiscount('50%');
 
-        $this->assertEquals(300, $invoice->discount_value);
-
+        $this->assertEquals(175, $invoice->totalWithDiscount());
     }
 
     public function test_ableToFindInvoices()
     {
-        $model = new TestModel();
-        $model->save();
 
-        $invoice = Invoice::make();
-        $invoice->invoiceToName('Lahiru');
-        $invoice->invoiceToAddress('Anuradhapura');
-        $invoice->setInvoiceNumber("XA12345");
-
-        $inv = $model->attachInvoice($invoice);
+        $this->invoiceAble->attachInvoice($this->make_invoice("f123"));
 
         // find by invoice number
-        $this->assertNotNull($model->findInvoiceByNumber("XA12345"));
-        // find by invoice ID
-        $this->assertNotNull($model->findInvoiceById($inv->id));
-
+        $this->assertNotNull($this->invoiceAble->findInvoiceByNumber("f123"));
     }
 
     public function test_payForInvoice()
@@ -192,10 +139,35 @@ class InvoiceTest extends TestCase
         $inv->addPayment(-50);
 
         $this->assertDatabaseCount('laravel_invoice_payments', 3);
+        $this->assertEquals(500, $inv->paidAmount());
+    }
 
-        $this->assertEquals(500, $inv->payments()->sum('amount'));
+    public function test_updateInvoiceStatus()
+    {
+        $inv = $this->make_invoice();
+
+        $this->assertEquals(Invoice::STATUS_DRAFT, $inv->status);
+
+        $inv->setStatus(Invoice::STATUS_COMPLETED);
+
+        $this->assertEquals(Invoice::STATUS_COMPLETED, $inv->status);
+
+        $this->assertEquals('COMPLETED', $inv->statusToString());
+
 
     }
 
+    public function test_updateInvoicePaymentStatus()
+    {
+        $inv = $this->make_invoice();
+
+        $this->assertEquals(Invoice::STATUS_UNPAID, $inv->paid_status);
+
+        $inv->setPaymentStatus(Invoice::STATUS_PAID);
+
+        $this->assertEquals(Invoice::STATUS_PAID, $inv->paid_status);
+
+
+    }
 
 }
