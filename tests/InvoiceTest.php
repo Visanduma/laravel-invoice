@@ -41,9 +41,11 @@ class InvoiceTest extends TestCase
     private function add_items_to_invoice($invoice)
     {
         $invoice->items()->createMany([
-            ['name' => 'product 1', 'price' => 100, 'qty' => 2, 'total' => 200],
-            ['name' => 'product 2', 'price' => 150, 'qty' => 1, 'total' => 150],
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2],
+            ['name' => 'product 2', 'price' => 150, 'qty' => 1],
         ]);
+
+        $invoice->refresh();
 
         return $invoice;
     }
@@ -89,6 +91,21 @@ class InvoiceTest extends TestCase
         $this->assertCount(2, $invoice->items);
     }
 
+    public function test_applyPerItemDiscount()
+    {
+        $inv = $this->make_invoice();
+
+        $this->add_items_to_invoice($inv);
+
+        $this->assertEquals(350, $inv->total());
+
+        $inv->items->first()->setDiscount('20%');
+
+        $this->assertEquals(330, $inv->total());
+
+
+    }
+
     public function test_saveInvoiceExtra()
     {
         $invoice = $this->make_invoice();
@@ -102,23 +119,27 @@ class InvoiceTest extends TestCase
     {
         $invoice = $this->add_items_to_invoice($this->make_invoice());
 
-        $this->assertEquals(350, $invoice->total());
+        $this->assertEquals(350, $invoice->getItemsTotal());
     }
 
-    public function test_setFlatDiscount()
+    public function test_setFlatInvoiceDiscount()
     {
         $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
         $invoice->setDiscount(150);
 
-        $this->assertEquals(200, $invoice->totalWithDiscount());
+        $this->assertEquals(200, $invoice->total);
+
     }
 
-    public function test_setPercentageDiscount()
+    public function test_setPercentInvoiceDiscount()
     {
-        $invoice = $this->add_items_to_invoice($this->make_invoice()); // total 350
-        $invoice->setDiscount('50%');
+        $invoice = $this->make_invoice(); // total 350
+        $this->add_items_to_invoice($invoice);
 
-        $this->assertEquals(175, $invoice->totalWithDiscount());
+        $invoice->setDiscount('20%');
+
+        $this->assertEquals(280, $invoice->total);
+
     }
 
     public function test_ableToFindInvoices()
@@ -167,6 +188,42 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals(Invoice::STATUS_PAID, $inv->paid_status);
 
+
+    }
+
+    public function test_InvoiceItemHelpers()
+    {
+        $inv = $this->make_invoice();
+
+        $item = InvoiceItem::create([
+            'name' => 'product 1',
+            'price' => 100,
+            'qty' => 2,
+            'invoice_id' => $inv->id
+        ]);
+
+        $this->assertEquals(200, $item->total);
+
+        $item->setDiscount(50);
+
+        $this->assertEquals(150, $item->total);
+
+        $this->assertEquals(200, $item->totalWithoutDiscount());
+
+
+    }
+
+    public function test_invoiceHelpers()
+    {
+        $inv = $this->make_invoice();
+        $this->add_items_to_invoice($inv); // total 350
+
+        $this->assertEquals(350, $inv->getItemsTotal());
+        $this->assertEquals(2, $inv->getItemCount());
+        $this->assertEquals(0, $inv->paidAmount());
+
+        $this->assertNotEmpty(Invoice::getNextInvoiceNumber());
+        $this->assertEquals('DRAFT', $inv->statusToString());
 
     }
 

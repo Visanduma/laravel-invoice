@@ -23,6 +23,15 @@ class Invoice extends Model
     protected $guarded = [];
     protected $table = "laravel_invoices";
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        self::created(function ($model) {
+            $model->updateCalculation();
+        });
+    }
+
     public static function make()
     {
         return new static();
@@ -46,7 +55,7 @@ class Invoice extends Model
         ]);
 
         $this->decrement('due_amount', $amount);
-        $this->paid_status = "PAID";
+        $this->paid_status = self::STATUS_PAID;
         $this->save();
     }
 
@@ -65,17 +74,6 @@ class Invoice extends Model
         return $this->extra()->where('key', $key)->first()->value ?? "";
     }
 
-    public function paidAmount(): float
-    {
-        return $this->payments()->sum('amount');
-    }
-
-    public static function getNextInvoiceNumber($prefix = "INV")
-    {
-        $next_id= static::max('id') + 1;
-        return $prefix.Str::padLeft($next_id,6,"0");
-    }
-
     public function statusToString()
     {
         return Str::replace("_", " ", $this->status);
@@ -83,8 +81,9 @@ class Invoice extends Model
 
     public function updateCalculation()
     {
-        $this->total = $this->total();
-        $this->save();
+        $this->update([
+            'total' => $this->items()->sum('total') - $this->discount
+        ]);
     }
 
     public function setStatus($status)

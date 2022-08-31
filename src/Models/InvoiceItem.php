@@ -24,11 +24,10 @@ class InvoiceItem extends Model
 
         self::creating(function ($model) {
             $model->total = ($model['price'] * $model['qty']) - $model['discount'];
-
         });
 
         self::updating(function ($model) {
-            $model->total = $model['price'] * $model['qty'];
+            $model->total = ($model['price'] * $model['qty']) - $model['discount'];
         });
 
         self::created(function ($model) {
