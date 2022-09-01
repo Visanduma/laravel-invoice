@@ -13,5 +13,7 @@ class InvoiceExtra extends Model
 
     protected $table = 'laravel_invoice_extras';
 
+    protected $casts = ['value' => 'json'];
+
 
 }

@@ -2,4 +2,5 @@
 // config for Visanduma/LaravelInvoice
 return [
 
+
 ];

@@ -17,6 +17,14 @@ class InvoiceItem extends Model
     protected $guarded = [];
     protected $table = "laravel_invoice_items";
 
+    protected $casts = [
+        'discount' => 'double',
+        'discount_value' => 'double',
+        'total' => 'double',
+        'price' => 'double',
+        'qty' => 'int',
+    ];
+
 
     protected static function boot()
     {

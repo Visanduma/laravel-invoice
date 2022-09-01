@@ -31,7 +31,10 @@
         "psr-4": {
             "Visanduma\\LaravelInvoice\\": "src",
             "Visanduma\\LaravelInvoice\\Database\\Factories\\": "database/factories"
-        }
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

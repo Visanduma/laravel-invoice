@@ -97,12 +97,11 @@ class InvoiceTest extends TestCase
 
         $this->add_items_to_invoice($inv);
 
-        $this->assertEquals(350, $inv->total());
+        $this->assertEquals(350, $inv->getItemsTotal());
 
         $inv->items->first()->setDiscount('20%');
 
-        $this->assertEquals(330, $inv->total());
-
+        $this->assertEquals(330, $inv->getItemsTotal());
 
     }
 
@@ -111,9 +110,15 @@ class InvoiceTest extends TestCase
         $invoice = $this->make_invoice();
         $invoice->setExtraValue('fax', '012542856625');
 
-
         $this->assertEquals('012542856625', $invoice->getExtraValue('fax'));
+
+        $invoice->setExtraValue('tax', 'tax 1');
+        $invoice->setExtraValue('tax', 'tax 2');
+
+        $this->assertIsArray($invoice->getExtraValue('tax'));
+
     }
+
 
     public function test_calculateInvoiceTotal()
     {
@@ -154,13 +159,15 @@ class InvoiceTest extends TestCase
     public function test_payForInvoice()
     {
         $inv = $this->make_invoice();
+        $this->add_items_to_invoice($inv); // total 350
 
         $inv->addPayment(100);
-        $inv->addPayment(450);
+        $inv->addPayment(100);
         $inv->addPayment(-50);
 
         $this->assertDatabaseCount('laravel_invoice_payments', 3);
-        $this->assertEquals(500, $inv->paidAmount());
+        $this->assertEquals(150, $inv->paidAmount());
+        $this->assertEquals(200, $inv->due_amount); // check due balance
     }
 
     public function test_updateInvoiceStatus()
@@ -213,6 +220,25 @@ class InvoiceTest extends TestCase
 
     }
 
+    public function test_invoiceTaxes()
+    {
+        $inv = $this->make_invoice();
+
+        $this->add_items_to_invoice($inv); // total 350
+
+        $inv->addTax('VAT', 8);
+
+        $this->assertEquals(28, $inv->totalTaxAmount());
+
+        $inv->addTax('FAT', 2);
+
+        $this->assertEquals(35, $inv->totalTaxAmount());
+
+        $this->assertEquals(385, $inv->total);
+
+
+    }
+
     public function test_invoiceHelpers()
     {
         $inv = $this->make_invoice();
@@ -224,6 +250,30 @@ class InvoiceTest extends TestCase
 
         $this->assertNotEmpty(Invoice::getNextInvoiceNumber());
         $this->assertEquals('DRAFT', $inv->statusToString());
+
+    }
+
+    public function test_generateInvoiceDataArray()
+    {
+        $inv = $this->make_invoice();
+        $this->add_items_to_invoice($inv);
+
+        $inv->setCurrency('Rs.');
+
+        $inv->setExtraValues([
+            'to.name' => 'Customer name',
+            'to.address' => 'Street one, City, PO CODE',
+            'from.name' => 'Seller name',
+            'from.address' => 'Seller Street one, City, PO CODE',
+        ]);
+
+        $inv->addPayment(50, 'I paid');
+
+        $inv->addTax('VAT', 12);
+        $inv->addTax('NBT', 5);
+
+        $this->assertIsArray($inv->toArray());
+
 
     }
 

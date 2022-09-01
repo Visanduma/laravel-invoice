@@ -23,6 +23,13 @@ class Invoice extends Model
     protected $guarded = [];
     protected $table = "laravel_invoices";
 
+    protected $casts = [
+        'discount' => 'double',
+        'due_amount' => 'double',
+        'total' => 'double',
+        'paid_amount' => 'double'
+    ];
+
     protected static function boot()
     {
         parent::boot();
@@ -69,10 +76,6 @@ class Invoice extends Model
         return $this->hasMany(InvoiceExtra::class);
     }
 
-    public function getExtraValue($key)
-    {
-        return $this->extra()->where('key', $key)->first()->value ?? "";
-    }
 
     public function statusToString()
     {
@@ -81,10 +84,15 @@ class Invoice extends Model
 
     public function updateCalculation()
     {
+        // todo improve this calculation
+        $total = ($this->getItemsTotal() + $this->totalTaxAmount()) - ($this->discount);
+
         $this->update([
-            'total' => $this->items()->sum('total') - $this->discount
+            'total' => $total,
+            'due_amount' => $total - $this->paidAmount()
         ]);
     }
+
 
     public function setStatus($status)
     {
