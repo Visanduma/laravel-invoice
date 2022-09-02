@@ -12,6 +12,11 @@ class Payment extends Model
     protected $guarded = [];
     protected $table = "laravel_invoice_payments";
 
+    protected $casts = [
+        'created_at' => 'date:Y-m-d H:i:s',
+        'updated_at' => 'date:Y-m-d H:i:s',
+    ];
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);

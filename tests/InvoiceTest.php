@@ -170,7 +170,7 @@ class InvoiceTest extends TestCase
     public function test_ableToFindInvoices()
     {
 
-        $this->invoiceAble->attachInvoice($this->make_invoice("f123"));
+        $this->invoiceAble->attachInvoice($this->make_invoice());
 
         // find by invoice number
         $this->assertNotNull($this->invoiceAble->findInvoiceByNumber("INV000001"));
@@ -187,7 +187,7 @@ class InvoiceTest extends TestCase
 
         $this->assertDatabaseCount('laravel_invoice_payments', 3);
         $this->assertEquals(150, $inv->paidAmount());
-        $this->assertEquals(200, $inv->due_amount); // check due balance
+        $this->assertEquals(200, $inv->dueAmount()); // check due balance
     }
 
     public function test_updateInvoiceStatus()

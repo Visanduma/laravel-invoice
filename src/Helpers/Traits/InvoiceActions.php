@@ -109,6 +109,11 @@ trait InvoiceActions
         );
     }
 
+    public function dueAmount()
+    {
+        return $this->due_amount;
+    }
+
     public function totalTaxAmount()
     {
         $totalTaxPercentage = array_sum(array_column($this->getTax(), 'value'));
