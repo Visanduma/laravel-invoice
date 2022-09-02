@@ -13,25 +13,24 @@ class InvoiceTest extends TestCase
     use RefreshDatabase;
     use DatabaseMigrations;
 
-    private $testModel, $invoice;
 
-    private function make_invoice($number = 'XA12345'): Invoice
+    private function make_invoice(): Invoice
     {
         $invoice = [
             'invoice_date' => now(),
             'tag' => 'prime',
-            'due_data' => now()->addDay(),
-            'invoice_number' => $number,
-            'status' => Invoice::STATUS_DRAFT,
-            'paid_status' => Invoice::STATUS_UNPAID,
-            'note' => '',
-            'discount' => 0,
-            'discount_value' => 0,
-            'discount_type' => 1,
-            'sub_total' => 0,
-            'total' => 0,
-            'due_amount' => 0,
-            'created_by' => 2
+//            'note' => '',
+//            'discount' => 0,
+//            'discount_value' => 0,
+//            'discount_type' => 1,
+//            'sub_total' => 0,
+//            'total' => 0,
+//            'due_amount' => 0,
+//            'created_by' => 2
+//            'paid_status' => Invoice::STATUS_UNPAID,
+//            'status' => Invoice::STATUS_DRAFT,
+//            'invoice_number' => $number,
+//            'due_date' => now()->addDay(),
         ];
 
 
@@ -48,6 +47,22 @@ class InvoiceTest extends TestCase
         $invoice->refresh();
 
         return $invoice;
+    }
+
+    public function test_createInvoiceForModel()
+    {
+        $this->invoiceAble->invoices()->create([
+            'invoice_date' => now()
+        ]);
+
+        $this->assertDatabaseCount('laravel_invoices', 1);
+
+        $inv = Invoice::make();
+
+        $this->invoiceAble->attachInvoice($inv);
+
+        $this->assertDatabaseCount('laravel_invoices', 2);
+
     }
 
     public function test_saveInvoiceToDatabase()
@@ -115,10 +130,15 @@ class InvoiceTest extends TestCase
         $invoice->setExtraValue('tax', 'tax 1');
         $invoice->setExtraValue('tax', 'tax 2');
 
+        $invoice->setExtraValues([
+            'me' => 'yes',
+            'she' => 'no'
+        ]);
+
         $this->assertIsArray($invoice->getExtraValue('tax'));
+        $this->assertEquals('yes', $invoice->getExtraValue('me'));
 
     }
-
 
     public function test_calculateInvoiceTotal()
     {
@@ -153,7 +173,7 @@ class InvoiceTest extends TestCase
         $this->invoiceAble->attachInvoice($this->make_invoice("f123"));
 
         // find by invoice number
-        $this->assertNotNull($this->invoiceAble->findInvoiceByNumber("f123"));
+        $this->assertNotNull($this->invoiceAble->findInvoiceByNumber("INV000001"));
     }
 
     public function test_payForInvoice()

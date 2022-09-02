@@ -13,7 +13,7 @@ trait InvoiceAble
         return $this->morphMany(Invoice::class, 'invoiceable');
     }
 
-    public function attachInvoice(Invoice $invoice): Invoice
+    public function attachInvoice(Invoice $invoice)
     {
         return $this->invoices()->save($invoice);
     }

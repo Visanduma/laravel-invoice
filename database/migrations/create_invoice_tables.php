@@ -17,7 +17,7 @@ class CreateInvoiceTables extends Migration
             $table->id();
             $table->nullableMorphs('invoiceable');
             $table->date('invoice_date');
-            $table->date('due_data')->nullable();
+            $table->date('due_date')->nullable();
             $table->string('tag')->nullable();
             $table->string('invoice_number');
             $table->string('ref_number')->nullable();

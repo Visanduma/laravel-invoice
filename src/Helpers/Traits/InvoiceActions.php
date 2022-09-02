@@ -11,6 +11,7 @@ use Visanduma\LaravelInvoice\Helpers\MoneyFormatter;
 trait InvoiceActions
 {
 
+
     public function setDiscount($amount)
     {
         $isPercentage = Str::endsWith($amount, "%");
@@ -65,10 +66,10 @@ trait InvoiceActions
         return $this->payments()->sum('amount');
     }
 
-    public static function getNextInvoiceNumber($prefix = "INV")
+    public static function getNextInvoiceNumber()
     {
         $next_id = static::max('id') + 1;
-        return $prefix . Str::padLeft($next_id, 6, "0");
+        return config('invoice.prefix') . Str::padLeft($next_id, 6, "0");
     }
 
     public function setCurrency($currency = '$')

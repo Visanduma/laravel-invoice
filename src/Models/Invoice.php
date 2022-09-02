@@ -20,7 +20,11 @@ class Invoice extends Model
     const STATUS_PAID = 'PAID';
     const STATUS_UNPAID = 'UNPAID';
 
-    protected $guarded = [];
+    protected $guarded = [
+        'invoice_number',
+        'discount_value',
+        'discount_type'
+    ];
     protected $table = "laravel_invoices";
 
     protected $casts = [
@@ -34,6 +38,14 @@ class Invoice extends Model
     {
         parent::boot();
 
+        self::creating(function ($model) {
+            $model->invoice_date = $model->invoice_date ?? now();
+            $model->invoice_number = self::getNextInvoiceNumber();
+            $model->status = $model->status ?? self::STATUS_DRAFT;
+            $model->paid_status = $model->paid_status ?? self::STATUS_UNPAID;
+            $model->created_by = $model->created_by ?? auth()->id();
+        });
+
         self::created(function ($model) {
             $model->updateCalculation();
         });
@@ -41,7 +53,7 @@ class Invoice extends Model
 
     public static function make()
     {
-        return new static();
+        return static::create();
     }
 
     public function items()
