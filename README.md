@@ -18,7 +18,7 @@ composer require visanduma/laravel-invoice
 You can publish and run the migrations with:
 
 ```bash
-php artisan vendor:publish --tag="laravel-invoice-migrations"
+php artisan vendor:publish --tag="invoice-migrations"
 php artisan migrate
 ```
 
