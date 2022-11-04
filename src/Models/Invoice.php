@@ -16,6 +16,7 @@ class Invoice extends Model
     const STATUS_DRAFT = 'DRAFT';
     const STATUS_COMPLETED = 'COMPLETED';
     const STATUS_SENT = 'SENT';
+    const STATUS_CANCELED = 'CANCELED';
 
     const STATUS_PAID = 'PAID';
     const STATUS_UNPAID = 'UNPAID';
@@ -118,6 +119,11 @@ class Invoice extends Model
         $this->update([
             'paid_status' => $status
         ]);
+    }
+
+    public function paidAmount()
+    {
+        return $this->payments()->sum('amount');
     }
 
 }

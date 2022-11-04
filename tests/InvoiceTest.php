@@ -1,6 +1,7 @@
 <?php
 
 namespace Visanduma\LaravelInvoice\Tests;
+
 ;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -62,7 +63,6 @@ class InvoiceTest extends TestCase
         $this->invoiceAble->attachInvoice($inv);
 
         $this->assertDatabaseCount('laravel_invoices', 2);
-
     }
 
     public function test_saveInvoiceToDatabase()
@@ -117,7 +117,6 @@ class InvoiceTest extends TestCase
         $inv->items->first()->setDiscount('20%');
 
         $this->assertEquals(330, $inv->getItemsTotal());
-
     }
 
     public function test_saveInvoiceExtra()
@@ -137,7 +136,6 @@ class InvoiceTest extends TestCase
 
         $this->assertIsArray($invoice->getExtraValue('tax'));
         $this->assertEquals('yes', $invoice->getExtraValue('me'));
-
     }
 
     public function test_calculateInvoiceTotal()
@@ -153,7 +151,6 @@ class InvoiceTest extends TestCase
         $invoice->setDiscount(150);
 
         $this->assertEquals(200, $invoice->total);
-
     }
 
     public function test_setPercentInvoiceDiscount()
@@ -164,12 +161,10 @@ class InvoiceTest extends TestCase
         $invoice->setDiscount('20%');
 
         $this->assertEquals(280, $invoice->total);
-
     }
 
     public function test_ableToFindInvoices()
     {
-
         $this->invoiceAble->attachInvoice($this->make_invoice());
 
         // find by invoice number
@@ -201,8 +196,6 @@ class InvoiceTest extends TestCase
         $this->assertEquals(Invoice::STATUS_COMPLETED, $inv->status);
 
         $this->assertEquals('COMPLETED', $inv->statusToString());
-
-
     }
 
     public function test_updateInvoicePaymentStatus()
@@ -214,8 +207,6 @@ class InvoiceTest extends TestCase
         $inv->setPaymentStatus(Invoice::STATUS_PAID);
 
         $this->assertEquals(Invoice::STATUS_PAID, $inv->paid_status);
-
-
     }
 
     public function test_InvoiceItemHelpers()
@@ -236,8 +227,6 @@ class InvoiceTest extends TestCase
         $this->assertEquals(150, $item->total);
 
         $this->assertEquals(200, $item->totalWithoutDiscount());
-
-
     }
 
     public function test_invoiceTaxes()
@@ -255,8 +244,6 @@ class InvoiceTest extends TestCase
         $this->assertEquals(35, $inv->totalTaxAmount());
 
         $this->assertEquals(385, $inv->total);
-
-
     }
 
     public function test_invoiceHelpers()
@@ -271,6 +258,10 @@ class InvoiceTest extends TestCase
         $this->assertNotEmpty(Invoice::getNextInvoiceNumber());
         $this->assertEquals('DRAFT', $inv->statusToString());
 
+        $inv->addPayment(50);
+        $inv->addPayment(150);
+
+        $this->assertEquals(200, $inv->paidAmount());
     }
 
     public function test_generateInvoiceDataArray()
@@ -293,8 +284,5 @@ class InvoiceTest extends TestCase
         $inv->addTax('NBT', 5);
 
         $this->assertIsArray($inv->toArray());
-
-
     }
-
 }
