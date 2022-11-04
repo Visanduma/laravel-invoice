@@ -135,7 +135,7 @@ trait InvoiceActions
         }, $this->getTax());
     }
 
-    public function toArray()
+    public function asArray()
     {
 
         $this->load('items', 'payments', 'extra');
