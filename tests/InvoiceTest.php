@@ -165,6 +165,7 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals(280, $invoice->total);
         $this->assertEquals(20, $invoice->discount_value);
+        $this->assertEquals(70, $invoice->discount);
     }
 
     public function test_ableToFindInvoices()

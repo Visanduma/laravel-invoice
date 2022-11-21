@@ -11,6 +11,22 @@ use Visanduma\LaravelInvoice\Helpers\MoneyFormatter;
 trait InvoiceActions
 {
 
+    public function addPayment($amount,  $note = null,$method = 'CASH')
+    {
+        if($amount == 0){
+            return;
+        }
+        $this->payments()->create([
+            'method' => $method,
+            'amount' => $amount,
+            'payment_date' => now(),
+            'note' => $note
+        ]);
+
+        $this->decrement('due_amount', $amount);
+        $this->paid_status = self::STATUS_PAID;
+        $this->save();
+    }
 
     public function setDiscount($amount)
     {
@@ -20,7 +36,7 @@ trait InvoiceActions
         $this->update([
             'discount_type' => $isPercentage ? 'percentage' : 'amount',
             'discount_value' => $amount,
-            'discount' => $isPercentage ? ($this->total * $amount / 100) : $amount,
+            'discount' => $isPercentage ? ($this->getItemsTotal() * $amount / 100) : $amount,
         ]);
 
         $this->updateCalculation();

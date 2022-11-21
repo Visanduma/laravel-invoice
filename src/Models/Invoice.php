@@ -60,22 +60,7 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
-    public function addPayment($amount,  $note = null,$method = 'CASH')
-    {
-        if($amount == 0){
-            return;
-        }
-        $this->payments()->create([
-            'method' => $method,
-            'amount' => $amount,
-            'payment_date' => now(),
-            'note' => $note
-        ]);
-
-        $this->decrement('due_amount', $amount);
-        $this->paid_status = self::STATUS_PAID;
-        $this->save();
-    }
+    
 
     public function payments()
     {
