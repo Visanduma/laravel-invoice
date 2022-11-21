@@ -114,7 +114,7 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals(350, $inv->getItemsTotal());
 
-        $inv->items->first()->setDiscount('20%');
+        $inv->items->first()->setDiscount(20);
 
         $this->assertEquals(330, $inv->getItemsTotal());
     }
@@ -151,6 +151,9 @@ class InvoiceTest extends TestCase
         $invoice->setDiscount(150);
 
         $this->assertEquals(200, $invoice->total);
+        $this->assertEquals(150, $invoice->discount_value);
+        $this->assertEquals(150, $invoice->discount);
+        $this->assertEquals('amount', $invoice->discount_type);
     }
 
     public function test_setPercentInvoiceDiscount()
@@ -161,6 +164,7 @@ class InvoiceTest extends TestCase
         $invoice->setDiscount('20%');
 
         $this->assertEquals(280, $invoice->total);
+        $this->assertEquals(20, $invoice->discount_value);
     }
 
     public function test_ableToFindInvoices()
@@ -222,8 +226,10 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals(200, $item->total);
 
-        $item->setDiscount(50);
+        $item->setDiscount('10%');
+        $this->assertEquals(180, $item->total);
 
+        $item->setDiscount(50);
         $this->assertEquals(150, $item->total);
 
         $this->assertEquals(200, $item->totalWithoutDiscount());

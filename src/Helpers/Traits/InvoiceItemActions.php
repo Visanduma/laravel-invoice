@@ -17,7 +17,7 @@ trait InvoiceItemActions
         $this->update([
             'discount_type' => $isPercentage ? 'percentage' : 'amount',
             'discount_value' => $amount,
-            'discount' => $isPercentage ? ($this->price * $amount / 100) : $amount,
+            'discount' => $isPercentage ? ($this->price * $this->qty *  $amount / 100) : $amount,
         ]);
 
         $this->invoice->updateCalculation();

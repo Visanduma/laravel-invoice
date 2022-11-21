@@ -22,9 +22,7 @@ class Invoice extends Model
     const STATUS_UNPAID = 'UNPAID';
 
     protected $guarded = [
-        'invoice_number',
-        'discount_value',
-        'discount_type'
+        'invoice_number'
     ];
     protected $table = "laravel_invoices";
 
