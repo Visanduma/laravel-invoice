@@ -85,6 +85,7 @@ class Invoice extends Model
 
         $this->update([
             'total' => $total,
+            'sub_total' => $this->getItemsTotal(),
             'due_amount' => $total - $this->paidAmount()
         ]);
     }
