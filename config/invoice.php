@@ -2,6 +2,8 @@
 // config for Visanduma/LaravelInvoice
 return [
 
-    'prefix' => 'INV'
+    'prefix' => 'INV',
+    
+    'user_model' => null
 
 ];

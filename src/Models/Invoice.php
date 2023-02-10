@@ -60,7 +60,7 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
-    
+
 
     public function payments()
     {
@@ -110,4 +110,13 @@ class Invoice extends Model
         return $this->payments()->sum('amount');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(config('invoice.user_model'), 'created_by');
+    }
+
+    public function invoiceable()
+    {
+        return $this->morphTo('invoiceable');
+    }
 }
