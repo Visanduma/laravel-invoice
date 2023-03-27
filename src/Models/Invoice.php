@@ -21,6 +21,9 @@ class Invoice extends Model
     const STATUS_PAID = 'PAID';
     const STATUS_UNPAID = 'UNPAID';
 
+    const TYPE_INVOICE = 0;
+    const TYPE_QUOTE = 1;
+
     protected $guarded = [
         'invoice_number'
     ];
