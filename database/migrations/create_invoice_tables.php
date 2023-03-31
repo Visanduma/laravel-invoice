@@ -16,7 +16,6 @@ class CreateInvoiceTables extends Migration
     {
         Schema::create('laravel_invoices', function (Blueprint $table) {
             $table->id();
-            $table->integer('type')->default(0);
             $table->nullableMorphs('invoiceable');
             $table->date('invoice_date');
             $table->date('due_date')->nullable();
@@ -39,12 +38,12 @@ class CreateInvoiceTables extends Migration
 
         Schema::create('laravel_invoice_extras', function (Blueprint $table) {
             $table->id();
-            $table->morphs('model');
+            $table->unsignedBigInteger('invoice_id');
             $table->string('key');
             $table->longText('value');
             $table->timestamps();
 
-            // $table->foreign('invoice_id')->references('id')->on('laravel_invoices')->onDelete('cascade');
+            $table->foreign('invoice_id')->references('id')->on('laravel_invoices')->onDelete('cascade');
         });
 
         Schema::create('laravel_invoice_items', function (Blueprint $table) {

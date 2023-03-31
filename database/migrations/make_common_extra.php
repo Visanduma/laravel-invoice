@@ -14,9 +14,9 @@ class MakeCommonExtra extends Migration
     public function up()
     {
         Schema::table('laravel_invoice_extras', function (Blueprint $table) {
-            $table->morphs('extra');
+            $table->dropColumn(['invoice_id']);
+            $table->morphs('model');
             $table->dropConstrainedForeignId('invoice_id');
-            $table->dropColumn('invoice_id');
         });
     }
 
@@ -28,7 +28,7 @@ class MakeCommonExtra extends Migration
     public function down()
     {
         Schema::table('laravel_invoice_extras', function (Blueprint $table) {
-            $table->dropMorphs('extra');
+            $table->dropMorphs('model');
             $table->unsignedBigInteger('invoice_id');
 
         });
