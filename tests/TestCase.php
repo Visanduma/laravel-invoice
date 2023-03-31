@@ -44,6 +44,7 @@ class TestCase extends Orchestra
         (new TestTable())->up();
 
         include_once __DIR__ . '/../database/migrations/create_invoice_tables.php';
+
         (new \CreateInvoiceTables())->up();
 
     }
