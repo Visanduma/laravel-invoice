@@ -11,9 +11,9 @@ use Visanduma\LaravelInvoice\Helpers\MoneyFormatter;
 trait InvoiceActions
 {
 
-    public function addPayment($amount,  $note = null,$method = 'CASH')
+    public function addPayment($amount,  $note = null, $method = 'CASH')
     {
-        if($amount == 0){
+        if ($amount == 0) {
             return;
         }
         $this->payments()->create([
@@ -31,7 +31,7 @@ trait InvoiceActions
     public function setDiscount($amount)
     {
         $isPercentage = Str::endsWith($amount, "%");
-        $amount = (double)$amount;
+        $amount = (float)$amount;
 
         $this->update([
             'discount_type' => $isPercentage ? 'percentage' : 'amount',
@@ -40,7 +40,6 @@ trait InvoiceActions
         ]);
 
         $this->updateCalculation();
-
     }
 
     public function addItems(array $items)
@@ -53,7 +52,24 @@ trait InvoiceActions
         return $this->items->count();
     }
 
+    public function setExtraValue($key, $value)
+    {
+        if (is_array($value)) {
+            $value = json_encode($value);
+        }
 
+        $this->extra()->create([
+            'key' => $key,
+            'value' => $value
+        ]);
+    }
+
+    public function setExtraValues(array $values)
+    {
+        foreach ($values as $key => $value) {
+            $this->setExtraValue($key, $value);
+        }
+    }
 
     public function getItemsTotal()
     {
@@ -67,7 +83,7 @@ trait InvoiceActions
 
     public static function getNextInvoiceNumber()
     {
-        $next_id = static::max('id') + 1;
+        $next_id = self::max('id') + 1;
         return config('invoice.prefix') . Str::padLeft($next_id, 6, "0");
     }
 
@@ -76,7 +92,14 @@ trait InvoiceActions
         $this->setExtraValue('currency', $currency);
     }
 
-    
+    public function getExtraValue($key, $default = "")
+    {
+        $rows = $this->extra()->where('key', $key)->get();
+
+        return $rows->count() > 1
+            ? $rows->pluck('value')->toArray()
+            : $rows->first()->value ?? $default;
+    }
 
     public function getCurrency(): string
     {
@@ -95,9 +118,11 @@ trait InvoiceActions
 
     public function getTax()
     {
-        return array_map(function ($json) {
-            return json_decode($json, true);
-        }, Arr::wrap($this->getExtraValue('taxes'))
+        return array_map(
+            function ($json) {
+                return json_decode($json, true);
+            },
+            Arr::wrap($this->getExtraValue('taxes'))
         );
     }
 
@@ -111,7 +136,6 @@ trait InvoiceActions
         $totalTaxPercentage = array_sum(array_column($this->getTax(), 'value'));
 
         return $this->calculateTax($totalTaxPercentage);
-
     }
 
     private function calculateTax($tax)
@@ -163,9 +187,5 @@ trait InvoiceActions
                 'currency' => $this->getCurrency(),
             ]
         ];
-
-
     }
-
-
 }
