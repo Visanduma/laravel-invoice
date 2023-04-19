@@ -72,7 +72,7 @@ class Invoice extends Model
 
     public function extra()
     {
-        return $this->hasMany(InvoiceExtra::class);
+        return $this->hasMany(InvoiceExtra::class,'id');
     }
 
 
