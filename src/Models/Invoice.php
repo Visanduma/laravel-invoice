@@ -5,7 +5,6 @@ namespace Visanduma\LaravelInvoice\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Visanduma\LaravelInvoice\Helpers\Traits\HasExtraValues;
 use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceActions;
 
 
@@ -13,7 +12,6 @@ class Invoice extends Model
 {
     use HasFactory;
     use InvoiceActions;
-    use HasExtraValues;
 
     const STATUS_DRAFT = 'DRAFT';
     const STATUS_COMPLETED = 'COMPLETED';
@@ -70,6 +68,11 @@ class Invoice extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function extra()
+    {
+        return $this->hasMany(InvoiceExtra::class);
     }
 
 

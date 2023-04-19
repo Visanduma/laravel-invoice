@@ -44,12 +44,7 @@ class TestCase extends Orchestra
         (new TestTable())->up();
 
         include_once __DIR__ . '/../database/migrations/create_invoice_tables.php';
-        include_once __DIR__ . '/../database/migrations/add_invoice_type.php';
-        include_once __DIR__ . '/../database/migrations/make_common_extra.php';
-
         (new \CreateInvoiceTables())->up();
-        (new \AddInvoiceType())->up();
-        (new \MakeCommonExtra())->up();
 
     }
 }

@@ -41,7 +41,7 @@ class InvoiceTest extends TestCase
     private function add_items_to_invoice($invoice)
     {
         $invoice->items()->createMany([
-            ['name' => 'product 1', 'price' => 100, 'qty' => 2 ],
+            ['name' => 'product 1', 'price' => 100, 'qty' => 2],
             ['name' => 'product 2', 'price' => 150, 'qty' => 1],
         ]);
 
@@ -222,12 +222,8 @@ class InvoiceTest extends TestCase
             'name' => 'product 1',
             'price' => 100,
             'qty' => 2,
-            'invoice_id' => $inv->id,
+            'invoice_id' => $inv->id
         ]);
-
-        $item->setExtraValue('batch','bb678');
-
-        $this->assertEquals('bb678',$item->getExtraValue('batch'));
 
         $this->assertEquals(200, $item->total);
 
@@ -296,5 +292,4 @@ class InvoiceTest extends TestCase
 
         $this->assertIsArray($inv->toArray());
     }
-
 }

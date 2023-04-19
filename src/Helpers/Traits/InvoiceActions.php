@@ -54,6 +54,10 @@ trait InvoiceActions
 
     public function setExtraValue($key, $value)
     {
+        if (empty($value)) {
+            return;
+        }
+
         if (is_array($value)) {
             $value = json_encode($value);
         }
