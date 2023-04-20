@@ -4,12 +4,14 @@ namespace Visanduma\LaravelInvoice\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Visanduma\LaravelInvoice\Helpers\Traits\HasExtraValues;
 use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceItemActions;
 
 class InvoiceItem extends Model
 {
     use HasFactory;
     use InvoiceItemActions;
+    use HasExtraValues;
 
     const DISCOUNT_FLAT = 0;
     const DISCOUNT_PERCENTAGE = 1;

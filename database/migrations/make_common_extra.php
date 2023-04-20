@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class MakeCommonExtra extends Migration
@@ -13,10 +14,11 @@ class MakeCommonExtra extends Migration
      */
     public function up()
     {
+        dd(DB::getDefaultConnection());
         Schema::table('laravel_invoice_extras', function (Blueprint $table) {
             $table->dropColumn(['invoice_id']);
             $table->morphs('model');
-            $table->dropConstrainedForeignId('invoice_id');
+            // $table->dropConstrainedForeignId('invoice_id');
         });
     }
 
@@ -30,7 +32,6 @@ class MakeCommonExtra extends Migration
         Schema::table('laravel_invoice_extras', function (Blueprint $table) {
             $table->dropMorphs('model');
             $table->unsignedBigInteger('invoice_id');
-
         });
     }
 }

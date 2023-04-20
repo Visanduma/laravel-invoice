@@ -18,7 +18,7 @@ class TestCase extends Orchestra
         $this->setupMigrations();
 
         Factory::guessFactoryNamesUsing(
-            fn(string $modelName) => 'Visanduma\\LaravelInvoice\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn (string $modelName) => 'Visanduma\\LaravelInvoice\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
         );
 
         $this->invoiceAble = new TestModel();
@@ -35,7 +35,6 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
-
     }
 
     protected function setupMigrations()
@@ -45,6 +44,12 @@ class TestCase extends Orchestra
 
         include_once __DIR__ . '/../database/migrations/create_invoice_tables.php';
         (new \CreateInvoiceTables())->up();
+
+        include_once __DIR__ . '/../database/migrations/add_invoice_type.php';
+        (new \AddInvoiceType())->up();
+
+        include_once __DIR__ . '/../database/migrations/make_common_extra.php';
+        (new \MakeCommonExtra())->up();
 
     }
 }
