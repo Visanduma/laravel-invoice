@@ -38,4 +38,13 @@ trait HasExtraValues {
             ? $rows->pluck('value')->toArray()
             : $rows->first()->value ?? $default;
     }
+
+    public function getExtraAttributes($key, $default = "")
+    {
+        $rows = $this->extra()->where('key', 'LIKE', $key.'%')->get();
+
+        return $rows->count() > 1
+            ? $rows->pluck('value')->toArray()
+            : $rows->first()->value ?? $default;
+    }
 }
