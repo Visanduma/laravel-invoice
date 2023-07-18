@@ -23,7 +23,7 @@ trait HasExtraValues {
         ]);
     }
 
-    public function setExtraValues(array $values)
+    public function setExtraValues(array $values, string $prefix = "")
     {
         foreach ($values as $key => $value) {
             $this->setExtraValue($key, $value);
@@ -41,10 +41,18 @@ trait HasExtraValues {
 
     public function getExtraAttributes($key, $default = "")
     {
-        $rows = $this->extra()->where('key', 'LIKE', $key.'%')->get();
+        $rows = $this->extra()->where('key', 'LIKE', $key . '%')->get();
 
         return $rows->count() > 1
             ? $rows->pluck('value')->toArray()
             : $rows->first()->value ?? $default;
+    }
+
+    public function getExtraValues($key)
+    {
+        return $this->extra()->where('key', 'like', $key . '.%')->get()->mapWithKeys(function ($itm) use ($key) {
+            $key = str($itm->key)->remove($key . '.')->toString();
+            return [$key => $itm->value];
+        })->toArray();
     }
 }
