@@ -48,10 +48,10 @@ trait HasExtraValues {
             : $rows->first()->value ?? $default;
     }
 
-    public function getExtraValues($key)
+    public function getExtraValues($key, bool $preserveKey = true)
     {
-        return $this->extra()->where('key', 'like', $key . '.%')->get()->mapWithKeys(function ($itm) use ($key) {
-            $key = str($itm->key)->remove($key . '.')->toString();
+        return $this->extra()->where('key', 'like', $key . '.%')->get()->mapWithKeys(function ($itm) use ($key, $preserveKey) {
+            $key = $preserveKey ? $itm->key : str($itm->key)->remove($key . '.')->toString();
             return [$key => $itm->value];
         })->toArray();
     }
