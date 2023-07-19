@@ -32,11 +32,9 @@ trait HasExtraValues {
 
     public function getExtraValue($key, $default = "")
     {
-        $rows = $this->extra()->where('key', $key)->get();
+       $row = $this->extra()->where('key', $key)->first();
 
-        return $rows->count() > 1
-            ? $rows->pluck('value')->toArray()
-            : $rows->first()->value ?? $default;
+        return $row->value ?? $default;
     }
 
     public function getExtraAttributes($key, $default = "")
