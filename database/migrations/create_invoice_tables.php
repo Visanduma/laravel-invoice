@@ -37,7 +37,7 @@ class CreateInvoiceTables extends Migration
 
         Schema::create('laravel_invoice_extras', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('invoice_id');
+            $table->unsignedBigInteger('invoice_id')->nullable();
             $table->string('key');
             $table->longText('value');
             $table->timestamps();
@@ -76,8 +76,6 @@ class CreateInvoiceTables extends Migration
             $table->date('payment_date');
             $table->timestamps();
         });
-
-
     }
 
     /**

@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Visanduma\LaravelInvoice\Helpers\Traits;
 
-
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Visanduma\LaravelInvoice\Helpers\MoneyFormatter;
 
@@ -78,49 +75,9 @@ trait InvoiceActions
         return $this->getExtraValue('currency');
     }
 
-    public function addTax($name, $percentage)
-    {
-        $this->setExtraValue('taxes', [
-            'name' => $name,
-            'value' => $percentage
-        ]);
-
-        $this->updateCalculation();
-    }
-
-    public function getTax()
-    {
-        return array_map(
-            function ($json) {
-                return json_decode($json, true);
-            },
-            Arr::wrap($this->getExtraValue('taxes'))
-        );
-    }
-
     public function dueAmount()
     {
         return $this->due_amount;
-    }
-
-    public function totalTaxAmount()
-    {
-        $totalTaxPercentage = array_sum(array_column($this->getTax(), 'value'));
-
-        return $this->calculateTax($totalTaxPercentage);
-    }
-
-    private function calculateTax($tax)
-    {
-        return $this->getItemsTotal() * $tax / 100;
-    }
-
-    public function getTaxesWithAmount()
-    {
-        return array_map(function ($tax) {
-            $tax['amount'] = $this->calculateTax($tax['value']);
-            return $tax;
-        }, $this->getTax());
     }
 
     public function asArray()
@@ -132,15 +89,17 @@ trait InvoiceActions
 
         return [
             'from' => [
-                'name' => $this->getExtraValue('from.name'),
-                'address' => $this->getExtraValue('from.address'),
-                'contact' => $this->getExtraValue('from.contact'),
+                'name' => $this->getExtraValue('seller.name'),
+                'address' => $this->getExtraValue('seller.address'),
+                'phone' => $this->getExtraValue('seller.phone'),
+                'email' => $this->getExtraValue('seller.email'),
                 'extra' => ''
             ],
             'to' => [
-                'name' => $this->getExtraValue('to.name'),
-                'address' => $this->getExtraValue('to.address'),
-                'contact' => $this->getExtraValue('to.contact'),
+                'name' => $this->getExtraValue('customer.name'),
+                'address' => $this->getExtraValue('customer.address'),
+                'phone' => $this->getExtraValue('customer.phone'),
+                'email' => $this->getExtraValue('customer.email'),
                 'extra' => ''
             ],
             'items' => $this->items->toArray(),
@@ -148,12 +107,12 @@ trait InvoiceActions
             'taxes' => $this->getTaxesWithAmount(),
             'summary' => [
                 'items_count' => $this->getItemCount(),
-                'gross_total' => money($this->getItemsTotal()), // without invoice tax/discount
-                'total' => money($this->total),
-                'discount' => money($this->discount),
-                'paid_amount' => money($this->paidAmount()),
-                'due_amount' => money($this->due_amount),
-                'tax_total' => money($this->totalTaxAmount()),
+                'gross_total' => ($this->getItemsTotal()), // without invoice tax/discount
+                'total' => ($this->total),
+                'discount' => ($this->discount),
+                'paid_amount' => ($this->paidAmount()),
+                'due_amount' => ($this->due_amount),
+                'tax_total' => ($this->totalTaxAmount()),
                 'status' => $this->statusToString(),
                 'date' => $this->created_at->toDateTimeString(),
                 'currency' => $this->getCurrency(),

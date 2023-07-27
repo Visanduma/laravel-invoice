@@ -14,11 +14,15 @@ class MakeCommonExtra extends Migration
      */
     public function up()
     {
-        dd(DB::getDefaultConnection());
+        if (DB::getDriverName() !== 'sqlite') {
+            Schema::table('laravel_invoice_extras', function (Blueprint $table) {
+                $table->dropConstrainedForeignId(['invoice_id']);
+            });
+        }
+
         Schema::table('laravel_invoice_extras', function (Blueprint $table) {
-            $table->dropColumn(['invoice_id']);
             $table->morphs('model');
-            // $table->dropConstrainedForeignId('invoice_id');
+            // $table->dropColumn('invoice_id');
         });
     }
 

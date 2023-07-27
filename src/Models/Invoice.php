@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Visanduma\LaravelInvoice\Helpers\Traits\HasExtraValues;
 use Visanduma\LaravelInvoice\Helpers\Traits\InvoiceActions;
-
+use Visanduma\LaravelInvoice\Helpers\Traits\Taxable;
 
 class Invoice extends Model
 {
     use HasFactory;
     use InvoiceActions;
     use HasExtraValues;
+    use Taxable;
 
     const STATUS_DRAFT = 'DRAFT';
     const STATUS_COMPLETED = 'COMPLETED';
@@ -22,6 +23,7 @@ class Invoice extends Model
 
     const STATUS_PAID = 'PAID';
     const STATUS_UNPAID = 'UNPAID';
+    const STATUS_PARTIALLY_PAID = 'PARTIALLY PAID';
 
     const TYPE_INVOICE = 0;
     const TYPE_QUOTE = 1;

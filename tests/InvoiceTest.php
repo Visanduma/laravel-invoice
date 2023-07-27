@@ -1,18 +1,18 @@
 <?php
 
-namespace Visanduma\LaravelInvoice\Tests;
-
-;
+namespace Visanduma\LaravelInvoice\Tests;;
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Visanduma\LaravelInvoice\Models\Invoice;
+use Visanduma\LaravelInvoice\Models\InvoiceExtra;
 use Visanduma\LaravelInvoice\Models\InvoiceItem;
 
 class InvoiceTest extends TestCase
 {
     use RefreshDatabase;
-    use DatabaseMigrations;
 
 
     private function make_invoice(): Invoice
@@ -20,18 +20,18 @@ class InvoiceTest extends TestCase
         $invoice = [
             'invoice_date' => now(),
             'tag' => 'prime',
-//            'note' => '',
-//            'discount' => 0,
-//            'discount_value' => 0,
-//            'discount_type' => 1,
-//            'sub_total' => 0,
-//            'total' => 0,
-//            'due_amount' => 0,
-//            'created_by' => 2
-//            'paid_status' => Invoice::STATUS_UNPAID,
-//            'status' => Invoice::STATUS_DRAFT,
-//            'invoice_number' => $number,
-//            'due_date' => now()->addDay(),
+            //            'note' => '',
+            //            'discount' => 0,
+            //            'discount_value' => 0,
+            //            'discount_type' => 1,
+            //            'sub_total' => 0,
+            //            'total' => 0,
+            //            'due_amount' => 0,
+            //            'created_by' => 2
+            //            'paid_status' => Invoice::STATUS_UNPAID,
+            //            'status' => Invoice::STATUS_DRAFT,
+            //            'invoice_number' => $number,
+            //            'due_date' => now()->addDay(),
         ];
 
 
@@ -126,15 +126,13 @@ class InvoiceTest extends TestCase
 
         $this->assertEquals('012542856625', $invoice->getExtraValue('fax'));
 
-        $invoice->setExtraValue('tax', 'tax 1');
-        $invoice->setExtraValue('tax', 'tax 2');
+        $invoice->setExtraValue('tax', 15);
 
         $invoice->setExtraValues([
             'me' => 'yes',
             'she' => 'no'
         ]);
-
-        $this->assertIsArray($invoice->getExtraValue('tax'));
+        $this->assertEquals(15, $invoice->getExtraValue('tax'));
         $this->assertEquals('yes', $invoice->getExtraValue('me'));
     }
 
@@ -242,15 +240,12 @@ class InvoiceTest extends TestCase
 
         $this->add_items_to_invoice($inv); // total 350
 
-        $inv->addTax('VAT', 8);
+        $inv->addTax('VAT', 10); // 35
+        $inv->addTax('FAT', 8); // 28
 
-        $this->assertEquals(28, $inv->totalTaxAmount());
+        $this->assertEquals(63, $inv->totalTaxAmount());
 
-        $inv->addTax('FAT', 2);
-
-        $this->assertEquals(35, $inv->totalTaxAmount());
-
-        $this->assertEquals(385, $inv->total);
+        $this->assertEquals(413, $inv->total);
     }
 
     public function test_invoiceHelpers()
