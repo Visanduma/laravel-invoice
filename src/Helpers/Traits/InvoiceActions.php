@@ -21,7 +21,9 @@ trait InvoiceActions
         ]);
 
         $this->decrement('due_amount', $amount);
-        $this->paid_status = self::STATUS_PAID;
+
+        $this->paid_status = $this->due_amount > 0 ? self::STATUS_PARTIALLY_PAID : self::STATUS_PAID;
+        
         $this->save();
     }
 

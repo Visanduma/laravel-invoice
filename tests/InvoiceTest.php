@@ -186,6 +186,10 @@ class InvoiceTest extends TestCase
         $this->assertDatabaseCount('laravel_invoice_payments', 3);
         $this->assertEquals(150, $inv->paidAmount());
         $this->assertEquals(200, $inv->dueAmount()); // check due balance
+
+        $this->assertEquals(Invoice::STATUS_PARTIALLY_PAID, $inv->paid_status);
+        $inv->addPayment(200);
+        $this->assertEquals(Invoice::STATUS_PAID, $inv->paid_status);
     }
 
     public function test_updateInvoiceStatus()
