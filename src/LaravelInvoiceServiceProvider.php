@@ -5,6 +5,9 @@ namespace Visanduma\LaravelInvoice;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
+use Visanduma\LaravelInvoice\Services\InvoiceObserverService;
+use Visanduma\LaravelInvoice\Observers\InvoiceObserver;
+
 class LaravelInvoiceServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
@@ -19,5 +22,9 @@ class LaravelInvoiceServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasMigrations(['create_invoice_tables', 'add_invoice_type', 'make_common_extra']);
         //            ->hasCommand(LaravelInvoiceCommand::class);
+    }
+    public function boot()
+    {
+        InvoiceObserverService::register(InvoiceObserver::class);
     }
 }

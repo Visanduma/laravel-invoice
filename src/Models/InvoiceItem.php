@@ -36,10 +36,18 @@ class InvoiceItem extends Model
 
         self::creating(function ($model) {
             $model->total = ($model['price'] * $model['qty']) - $model['discount'];
+
+            if ($model->invoiceItemable && method_exists($model->invoiceItemable, 'adjustItemTotal')) {
+                $model->total = $model->invoiceItemable->adjustItemTotal($model);
+            }
         });
 
         self::updating(function ($model) {
             $model->total = ($model['price'] * $model['qty']) - $model['discount'];
+
+            if ($model->invoiceItemable && method_exists($model->invoiceItemable, 'adjustItemTotal')) {
+                $model->total = $model->invoiceItemable->adjustItemTotal($model);
+            }
         });
 
         self::created(function ($model) {
@@ -55,5 +63,18 @@ class InvoiceItem extends Model
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+
+    public function invoiceItemable()
+    {
+        return $this->morphTo();
+    }
+    public function handleItemAction($action, $params = [])
+    {
+        if ($this->invoiceItemable && method_exists($this->invoiceItemable, $action)) {
+            // Pass the current InvoiceItem and any additional parameters to the method
+            $this->invoiceItemable->{$action}($this, $params);
+        }
     }
 }

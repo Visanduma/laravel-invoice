@@ -4,7 +4,8 @@ namespace Visanduma\LaravelInvoice\Helpers\Traits;
 
 use Visanduma\LaravelInvoice\Models\InvoiceExtra;
 
-trait HasExtraValues {
+trait HasExtraValues
+{
 
     public function extra()
     {
@@ -32,7 +33,7 @@ trait HasExtraValues {
 
     public function getExtraValue($key, $default = "")
     {
-       $row = $this->extra()->where('key', $key)->first();
+        $row = $this->extra()->where('key', $key)->first();
 
         return $row->value ?? $default;
     }

@@ -15,5 +15,13 @@ class InvoiceExtra extends Model
 
     protected $casts = ['value' => 'json'];
 
+    public function labelMapping()
+    {
+        return $this->belongsTo(LabelMapping::class, 'key', 'key');
+    }
 
+    public function getLabelAttribute()
+    {
+        return $this->labelMapping->label ?? null;
+    }
 }
