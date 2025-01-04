@@ -20,7 +20,7 @@ class LaravelInvoiceServiceProvider extends PackageServiceProvider
         $package
             ->name('laravel-invoice')
             ->hasConfigFile()
-            ->hasMigrations(['create_invoice_tables', 'add_invoice_type', 'make_common_extra']);
+            ->hasMigrations(['create_invoice_tables', 'add_invoice_type', 'make_common_extra', 'update_invoice_items']);
         //            ->hasCommand(LaravelInvoiceCommand::class);
     }
     public function boot()
