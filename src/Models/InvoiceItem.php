@@ -77,4 +77,12 @@ class InvoiceItem extends Model
             $this->invoiceItemable->{$action}($this, $params);
         }
     }
+    public function parentItem()
+    {
+        return $this->belongsTo(InvoiceItem::class, 'parent_item_id');
+    }
+    public function childItems()
+    {
+        return $this->hasMany(InvoiceItem::class, 'parent_item_id');
+    }
 }
