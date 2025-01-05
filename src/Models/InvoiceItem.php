@@ -85,4 +85,8 @@ class InvoiceItem extends Model
     {
         return $this->hasMany(InvoiceItem::class, 'parent_item_id');
     }
+    public function scopeRootWithChildren($query)
+    {
+        $query->whereNull('parent_item_id')->with('childItems');
+    }
 }
