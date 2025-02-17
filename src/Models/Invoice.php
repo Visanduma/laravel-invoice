@@ -24,6 +24,8 @@ class Invoice extends Model
     const STATUS_PAID = 'PAID';
     const STATUS_UNPAID = 'UNPAID';
     const STATUS_PARTIALLY_PAID = 'PARTIALLY PAID';
+    const STATUS_PARTIALLY_REFUND = 'PARTIALLY REFUND';
+    const STATUS_REFUND = 'REFUND';
 
     const TYPE_INVOICE = 0;
     const TYPE_QUOTE = 1;
