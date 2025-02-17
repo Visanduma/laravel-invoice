@@ -122,4 +122,8 @@ class Invoice extends Model
     {
         return $this->morphTo('invoiceable');
     }
+    public function refundAmount()
+    {
+        return $this->payments()->where('method', 'REFUND')->sum('amount');
+    }
 }
